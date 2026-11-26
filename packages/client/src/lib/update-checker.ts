@@ -27,6 +27,7 @@
 // different states and the UI can show them differently.
 
 import type { BeadboxUpdateOutcome } from "./window-globals"
+import { UPDATES_ENABLED } from "./updates-enabled"
 import { ensureBeadboxStamp } from "./window-globals"
 
 // Retained for source compat with existing call sites. Endpoint and
@@ -77,6 +78,12 @@ export async function checkForUpdate(
   currentVersion: string,
   _options?: UpdateCheckOptions,
 ): Promise<UpdateCheckResult> {
+  // This build is not updated from upstream (see updates-enabled.ts): no check, no network.
+  if (!UPDATES_ENABLED) {
+    stamp("ok_no_update_same_version", { currentVersion })
+    return { status: "up-to-date" }
+  }
+
   // Browser-only mode has no updater. Reporting "up to date" here is honest:
   // there is no update mechanism, not a failed one.
   if (!isTauriRuntime()) {
